@@ -12,11 +12,14 @@ html {
 }
 
 .font-esthetic {
-    font-family: 'Sacramento', cursive !important;
+    font-family: 'Satisfy', cursive !important;
+    font-style: normal;
 }
 
 .font-arabic {
-    font-family: 'Noto Naskh Arabic', serif !important;
+    font-family: 'Amiri Quran', serif !important;
+    font-size: 1.5rem;
+    line-height: 2;
 }
 
 .img-center-crop {
