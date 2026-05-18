@@ -2,8 +2,8 @@
 <html lang="id">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Generator Link Undangan</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,8 +20,15 @@
         }
 
         textarea {
-            min-height: 180px;
             resize: vertical;
+        }
+
+        #guestList {
+            min-height: 180px;
+        }
+
+        #customMessage {
+            min-height: 140px;
         }
 
         .table-responsive {
@@ -45,9 +52,17 @@
                 💌 Generator Link Undangan
             </h2>
 
-            <p class="text-muted">
+            <p class="text-muted mb-4">
                 Format:
-                nomor,nama
+                <strong>1 baris = 1 nama tamu</strong>
+                <br><br>
+                Contoh:
+                <br>
+                Fakhri Qobus & Partner
+                <br>
+                Fairuz & Partner
+                <br>
+                Keluarga Bapak Ahmad
             </p>
 
             <div class="mb-3">
@@ -55,7 +70,11 @@
                     Base URL Undangan
                 </label>
 
-                <input type="text" class="form-control" id="baseUrl" value="https://wed.achmadfhbw.my.id">
+                <input
+                    type="text"
+                    class="form-control"
+                    id="baseUrl"
+                    value="https://wed.achmadfhbw.my.id">
             </div>
 
             <div class="mb-3">
@@ -63,33 +82,67 @@
                     Data Tamu
                 </label>
 
-                <textarea class="form-control" id="guestList" placeholder="Contoh:
-08123456789,Fakhri & Partner
-08222222222,Fairuz & Partner"></textarea>
+                <textarea
+                    class="form-control"
+                    id="guestList"
+                    placeholder="Contoh:
+Fakhri Qobus & Partner
+Fairuz & Partner
+Keluarga Bapak Ahmad"></textarea>
             </div>
 
             <div class="mb-3">
                 <label class="form-label">
-                    Import CSV (Opsional)
+                    Template Pesan WhatsApp (Opsional)
                 </label>
 
-                <input type="file" id="csvFile" class="form-control" accept=".csv">
+                <textarea
+                    class="form-control"
+                    id="customMessage"
+                    placeholder="Kosongkan kalau mau pakai template default.
+
+Placeholder:
+{nama}
+{link}"></textarea>
 
                 <small class="text-muted">
-                    Format CSV:
-                    nomor,nama
+                    Bisa pakai:
+                    <strong>{nama}</strong>
+                    dan
+                    <strong>{link}</strong>
+                </small>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Import TXT / CSV (Opsional)
+                </label>
+
+                <input
+                    type="file"
+                    id="csvFile"
+                    class="form-control"
+                    accept=".txt,.csv">
+
+                <small class="text-muted">
+                    Format:
+                    1 nama tamu per baris
                 </small>
             </div>
 
             <div class="d-flex gap-2 flex-wrap">
 
-                <button class="btn btn-primary" onclick="generateLinks()">
+                <button
+                    class="btn btn-primary"
+                    onclick="generateLinks()">
 
                     Generate Link
 
                 </button>
 
-                <button class="btn btn-success" onclick="downloadCSV()">
+                <button
+                    class="btn btn-success"
+                    onclick="downloadCSV()">
 
                     Download CSV
 
@@ -107,7 +160,6 @@
 
                         <tr>
                             <th>No</th>
-                            <th>Nomor WA</th>
                             <th>Nama Tamu</th>
                             <th>Link</th>
                             <th>Aksi</th>
@@ -131,7 +183,7 @@
             .getElementById('csvFile')
             .addEventListener(
                 'change',
-                function (event) {
+                function(event) {
 
                     const file =
                         event.target.files[0];
@@ -142,7 +194,7 @@
                         new FileReader();
 
                     reader.onload =
-                        function (e) {
+                        function(e) {
 
                             const rows =
                                 e.target.result
@@ -159,7 +211,6 @@
                                 .value =
                                 rows.join('\n');
 
-                            // reset hasil lama
                             generatedData = [];
 
                             document
@@ -168,17 +219,15 @@
                                 )
                                 .innerHTML = '';
 
-                            // auto generate lagi
                             generateLinks();
 
                             alert(
-                                'CSV berhasil dimuat 😆'
+                                'File berhasil dimuat 😆'
                             );
                         };
 
                     reader.readAsText(file);
 
-                    // reset input file
                     event.target.value =
                         '';
                 });
@@ -206,6 +255,14 @@
                 )
                 .filter(Boolean);
 
+            const customMessage =
+                document
+                .getElementById(
+                    'customMessage'
+                )
+                .value
+                .trim();
+
             const tbody =
                 document
                 .getElementById(
@@ -217,36 +274,7 @@
             generatedData = [];
 
             rows.forEach(
-                (row, index) => {
-
-                    const parts =
-                        row.split(',');
-
-                    if (
-                        parts.length < 2
-                    ) return;
-
-                    let nomor =
-                        parts[0]
-                        .replace(/\D/g, '')
-                        .trim();
-
-                    const guest =
-                        parts
-                        .slice(1)
-                        .join(',')
-                        .replace(/^"|"$/g, '')
-                        .trim();
-
-                    // otomatis 08 -> 628
-                    if (
-                        nomor.startsWith('08')
-                    ) {
-
-                        nomor =
-                            '62' +
-                            nomor.slice(1);
-                    }
+                (guest, index) => {
 
                     const encoded =
                         encodeURIComponent(
@@ -256,8 +284,8 @@
                     const link =
                         `${baseUrl}/?to=${encoded}`;
 
-                    const message =
-                        `Assalamualaikum Warahmatullahi Wabarakatuh
+                    const defaultMessage =
+`Assalamualaikum Warahmatullahi Wabarakatuh
 
 Kepada Yth.
 Bapak/Ibu/Saudara/i
@@ -266,69 +294,73 @@ ${guest}
 
 Dengan penuh kebahagiaan kami mengundang Anda untuk hadir di acara pernikahan kami 😊
 
-Silakan untuk dapat membuka undangan melalui link berikut:
+Silakan membuka undangan melalui link berikut:
 ${link}`;
 
-                    const waLink =
-                        `https://wa.me/${nomor}?text=${encodeURIComponent(message)}`;
+                    const message =
+                        customMessage
+                        ? customMessage
+                            .replaceAll(
+                                '{nama}',
+                                guest
+                            )
+                            .replaceAll(
+                                '{link}',
+                                link
+                            )
+                        : defaultMessage;
 
                     generatedData.push({
-                        nomor,
                         nama: guest,
-                        link
+                        link,
+                        message
                     });
 
                     tbody.innerHTML += `
-            <tr>
+<tr>
 
-                <td>
-                    ${index + 1}
-                </td>
+<td>
+${index + 1}
+</td>
 
-                <td>
-                    ${nomor}
-                </td>
+<td>
+${guest}
+</td>
 
-                <td>
-                    ${guest}
-                </td>
+<td class="link-cell">
 
-                <td class="link-cell">
+<a
+href="${link}"
+target="_blank">
 
-                    <a
-                        href="${link}"
-                        target="_blank">
+${link}
 
-                        ${link}
+</a>
 
-                    </a>
+</td>
 
-                </td>
+<td class="d-flex gap-2 flex-wrap">
 
-                <td
-                class="d-flex gap-2 flex-wrap">
+<button
+class="btn btn-sm btn-primary"
+onclick="copyLink('${link}')">
 
-                    <button
-                        class="btn btn-sm btn-primary"
-                        onclick="copyLink('${link}')">
+Copy Link
 
-                        Copy
+</button>
 
-                    </button>
+<button
+class="btn btn-sm btn-success"
+onclick='copyMessage(${JSON.stringify(message)})'>
 
-                    <a
-                        href="${waLink}"
-                        target="_blank"
-                        class="btn btn-sm btn-success">
+Copy Pesan
 
-                        WA
+</button>
 
-                    </a>
+</td>
 
-                </td>
-
-            </tr>
-        `;
+</tr>
+`;
                 });
         }
 
@@ -340,6 +372,17 @@ ${link}`;
 
             alert(
                 'Link berhasil dicopy 😆'
+            );
+        }
+
+        function copyMessage(message) {
+
+            navigator
+                .clipboard
+                .writeText(message);
+
+            alert(
+                'Pesan berhasil dicopy 😆'
             );
         }
 
@@ -357,20 +400,21 @@ ${link}`;
             }
 
             let csv =
-                'Nomor WA,Nama Tamu,Link\n';
+                'Nama Tamu,Link\n';
 
             generatedData
                 .forEach(item => {
 
                     csv +=
-                        `"${item.nomor}","${item.nama}","${item.link}"\n`;
+                        `"${item.nama}","${item.link}"\n`;
 
                 });
 
             const blob =
                 new Blob(
                     [csv], {
-                        type: 'text/csv;charset=utf-8;'
+                        type:
+                            'text/csv;charset=utf-8;'
                     }
                 );
 
@@ -396,5 +440,5 @@ ${link}`;
     </script>
 
 </body>
-    
+
 </html>
